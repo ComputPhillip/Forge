@@ -10,9 +10,13 @@
   <a href="NOTICE"><img src="https://img.shields.io/badge/Based%20on-hermes--agent-blueviolet?style=for-the-badge" alt="Based on hermes-agent"></a>
 </p>
 
-> **What this is:** Forge is a community fork of [hermes-agent](https://github.com/NousResearch/hermes-agent) by [Nous Research](https://nousresearch.com), distributed under the same MIT license. Upstream copyright is preserved in [LICENSE](LICENSE) and fork attribution is documented in [NOTICE](NOTICE).
+> **What Forge is:** A community fork of [hermes-agent](https://github.com/NousResearch/hermes-agent) by [Nous Research](https://nousresearch.com), MIT-licensed, with upstream copyright preserved in [LICENSE](LICENSE) and fork attribution in [NOTICE](NOTICE).
 >
-> **What it's for:** Forge exists to explore divergent design choices on top of hermes-agent's foundation — different defaults, alternative tool surfaces, experimental harness ergonomics. Production users should evaluate upstream hermes-agent first; it has a larger community and faster security response.
+> **What's actually different from hermes-agent right now:** Only the branding, the binary name (`forge` vs. `hermes`), and the maintainer. The agent runtime, tool surface, memory system, and plugin ecosystem are byte-identical to upstream commit `e3236e9`. **You are running hermes-agent.**
+>
+> **Why fork then:** To explore divergent design choices that wouldn't fit upstream — different defaults, leaner tool sets, opinionated rewrites. None of that is shipped in v0.1.0. For the full comparison and when-to-choose-which, see [Forge vs. hermes-agent](#forge-vs-hermes-agent) below.
+>
+> **For production today, use upstream [hermes-agent](https://github.com/NousResearch/hermes-agent).** It has a larger community, faster security response, and is what Forge is built on.
 
 ---
 
@@ -34,9 +38,7 @@ Use any model you want — [Nous Portal](https://portal.nousresearch.com), [Open
 
 ## Status — Early Fork
 
-Forge is currently a **branding-stage fork**. The codebase is functionally hermes-agent with the user-visible surface rebranded. Substantive divergence (different defaults, alternative tools, harness changes) is a work in progress and will be documented in [CHANGELOG.md](CHANGELOG.md) as it lands.
-
-If you want the most stable, most-tested experience today, install hermes-agent directly. If you want to experiment with Forge's evolving direction or contribute to a smaller community fork, you're in the right place.
+`v0.1.0` is a **surface rebrand** of [hermes-agent](https://github.com/NousResearch/hermes-agent). Under the hood it is hermes-agent. For the full breakdown of what's different, what's planned, and when to use Forge vs. upstream, jump to [Forge vs. hermes-agent](#forge-vs-hermes-agent) below.
 
 ---
 
@@ -89,18 +91,67 @@ The `hermes` command is preserved as a backward-compatible alias during the fork
 
 ---
 
-## How Forge Differs from hermes-agent
+## Forge vs. hermes-agent
 
-This section will grow as Forge accumulates divergent design choices. As of the initial fork:
+### The honest version, in one paragraph
+
+Forge is hermes-agent with the user-visible surface rebranded. The agent loop, tool surface, memory system, plugin ecosystem, model providers, terminal backends, gateway, and platform integrations are byte-for-byte identical to the upstream fork point at the time of `v0.1.0`. **If you use Forge today, you are running hermes-agent with a different name on the binary and a different banner at startup.** That's the starting state, not the destination — the point of forking is to give a maintainer space to make design choices that may not fit upstream, without forcing those choices on the upstream community.
+
+### What's actually different right now
 
 | Aspect | hermes-agent | Forge |
 |---|---|---|
-| CLI binary name | `hermes` | `forge` (with `hermes` alias) |
-| Environment variable prefix | `HERMES_*` | `FORGE_*` (with `HERMES_*` backward-compat) |
-| Brand identity | Nous Research | Independent community fork |
-| Codebase | Same | Same (initial fork) |
+| **Project owner** | [Nous Research](https://nousresearch.com) — organization with a team | [ComputPhillip](https://github.com/ComputPhillip) — one maintainer, community fork |
+| **CLI binary** | `hermes` | `forge` (and `hermes` kept as a backward-compat alias on both branches) |
+| **Python packages** (`main`) | `hermes_cli/`, `hermes_constants.py`, etc. | Same as upstream — surface rebrand only |
+| **Python packages** (`feat/deep-rename-py` branch) | — | `forge_cli/`, `forge_constants.py`, `forge_bootstrap.py`, `forge_state.py`, `forge_time.py`, `forge_logging.py` — migration in progress |
+| **Environment variables** | `HERMES_*` (e.g. `HERMES_HOME`, `HERMES_API_KEY`) | Still `HERMES_*` — migration to `FORGE_*` with a backward-compat shim is **planned, not shipped** |
+| **Branding** | Hermes Agent identity by Nous Research | Forge identity. MIT-licensed. Clear upstream attribution in [LICENSE](LICENSE) and [NOTICE](NOTICE) |
+| **Release cadence** | Frequent, by the Nous team | Slower, dependent on this fork's interests and one maintainer's time |
+| **Bug fix response** | Large contributor community, fast security response | One maintainer, slower response, no dedicated security on-call |
+| **Feature set** | What ships in hermes-agent | **Identical** in v0.1.0. May become a subset or superset later as Forge diverges |
+| **Tests passing** | Maintained by upstream CI on every PR | Inherited; not yet re-verified end-to-end on Forge's CI |
 
-Concrete divergence is planned but not yet shipped. Watch [CHANGELOG.md](CHANGELOG.md) and the issue tracker for what's coming.
+Everything below the surface — the actual agent runtime — is unchanged from upstream commit [`e3236e99a40b84709d8bdd255136c1af8fb91aee`](https://github.com/NousResearch/hermes-agent/commit/e3236e99a40b84709d8bdd255136c1af8fb91aee). See [NOTICE](NOTICE) for the full fork attribution.
+
+### What Forge intends to explore
+
+This is the "why does this exist" part, and it's honest about being aspirational rather than shipped:
+
+- **Sharper defaults.** Opinionated configuration choices for specific use cases (e.g., code-generation-first workflows, or fewer-but-deeper tools instead of "everything available").
+- **Alternative tool surfaces.** Experimenting with smaller, leaner tool sets vs. hermes-agent's full ecosystem. Some of this work is being prototyped in a sibling [my-harness](https://github.com/ComputPhillip) project that comparatively benchmarks the lean-vs-rich tradeoff.
+- **Harness ergonomics.** Different agent-loop conventions, different approaches to memory and context windows, different cost/latency tradeoffs.
+- **Surgical changes that wouldn't fit upstream.** Opinionated rewrites that wouldn't be appropriate to propose against hermes-agent because they contradict its design goals or break compatibility for its broader user base.
+
+**None of the above is shipped in v0.1.0.** The CHANGELOG and this section will be updated as each lands.
+
+### When to choose Forge vs. hermes-agent
+
+**Use upstream [hermes-agent](https://github.com/NousResearch/hermes-agent) if:**
+- You need stability, broad community support, fast security response
+- You want frequent releases and an active dependabot/CI/issue triage cadence
+- You're putting this in production
+- You want issues triaged within hours, not days
+
+**Consider Forge if:**
+- You're interested in the divergent design choices listed above (once they ship)
+- You're contributing to this fork's experimental work
+- You want a stable target that intentionally moves slower than upstream
+- You want to follow this maintainer's specific direction
+
+For nearly everyone today, **upstream hermes-agent is the right answer.** Forge will earn its differentiation over time or not at all. The README will be updated honestly either way.
+
+### Contributing back vs. forking forward
+
+A practical convention this fork tries to follow:
+
+1. **If a fix is broadly useful** (security, correctness, portability, performance regression), it belongs upstream first. Open a PR against hermes-agent. The Forge tree should not become a competing dumping ground for fixes that everyone benefits from.
+2. **If a change is intentionally divergent** (different defaults, different APIs, opinions hermes-agent has explicitly rejected), it belongs in Forge.
+3. **If a change is uncertain**, default to upstream — it's harder to extract a feature from a fork later than to land it once.
+
+### Acknowledgments
+
+Nous Research built and maintains hermes-agent. Forge would not exist without their work. The MIT license at the root of this repository preserves their copyright unchanged, as required by MIT. If you find Forge useful, please also consider starring or supporting [hermes-agent](https://github.com/NousResearch/hermes-agent) — the underlying technology you're actually using.
 
 ---
 
