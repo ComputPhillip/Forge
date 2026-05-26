@@ -59,7 +59,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
 
-from hermes_constants import get_hermes_home, secure_parent_dir
+from forge_constants import get_hermes_home, secure_parent_dir
 
 logger = logging.getLogger(__name__)
 

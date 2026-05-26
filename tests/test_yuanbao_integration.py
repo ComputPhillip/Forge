@@ -113,9 +113,9 @@ class TestGatewayRunnerRegistration:
         # Stub out heavy dependencies if not already present
         stubs = [
             "dotenv",
-            "hermes_cli.env_loader",
-            "hermes_cli.config",
-            "hermes_constants",
+            "forge_cli.env_loader",
+            "forge_cli.config",
+            "forge_constants",
         ]
         _orig = {}
         for mod in stubs:

@@ -61,7 +61,7 @@ class TestChatVerboseArg:
     """Verify chat --verbose preserves config fallback when absent."""
 
     def test_chat_without_verbose_leaves_attribute_unset(self):
-        from hermes_cli._parser import build_top_level_parser
+        from forge_cli._parser import build_top_level_parser
 
         parser, _subparsers, _chat_parser = build_top_level_parser()
         args = parser.parse_args(["chat"])
@@ -69,7 +69,7 @@ class TestChatVerboseArg:
         assert not hasattr(args, "verbose")
 
     def test_chat_verbose_sets_attribute_true(self):
-        from hermes_cli._parser import build_top_level_parser
+        from forge_cli._parser import build_top_level_parser
 
         parser, _subparsers, _chat_parser = build_top_level_parser()
         args = parser.parse_args(["chat", "--verbose"])
@@ -80,8 +80,8 @@ class TestChatVerboseArg:
         import types
         import sys
 
-        import hermes_cli.main as main_mod
-        from hermes_cli._parser import build_top_level_parser
+        import forge_cli.main as main_mod
+        from forge_cli._parser import build_top_level_parser
 
         parser, _subparsers, chat_parser = build_top_level_parser()
         chat_parser.set_defaults(func=main_mod.cmd_chat)
@@ -93,13 +93,13 @@ class TestChatVerboseArg:
             captured.update(kwargs)
 
         setattr(fake_cli, "main", fake_main)
-        fake_banner = types.ModuleType("hermes_cli.banner")
+        fake_banner = types.ModuleType("forge_cli.banner")
         setattr(fake_banner, "prefetch_update_check", lambda: None)
         fake_skills_sync = types.ModuleType("tools.skills_sync")
         setattr(fake_skills_sync, "sync_skills", lambda quiet=True: None)
 
         monkeypatch.setitem(sys.modules, "cli", fake_cli)
-        monkeypatch.setitem(sys.modules, "hermes_cli.banner", fake_banner)
+        monkeypatch.setitem(sys.modules, "forge_cli.banner", fake_banner)
         monkeypatch.setitem(sys.modules, "tools.skills_sync", fake_skills_sync)
         monkeypatch.setattr(main_mod, "_has_any_provider_configured", lambda: True)
         monkeypatch.setattr(main_mod, "_pin_kanban_board_env", lambda: None)
@@ -172,7 +172,7 @@ class TestAcceptHooksOnAgentSubparsers:
         failing with `unrecognized arguments`."""
         import subprocess
         result = subprocess.run(
-            [sys.executable, "-m", "hermes_cli.main", *argv],
+            [sys.executable, "-m", "forge_cli.main", *argv],
             capture_output=True,
             text=True,
             timeout=15,

@@ -1,4 +1,4 @@
-"""Unit tests for hermes_cli.security_audit — parsers + OSV plumbing.
+"""Unit tests for forge_cli.security_audit — parsers + OSV plumbing.
 
 These never hit the live OSV API; HTTP is monkeypatched. The live-call path
 is exercised in the E2E test embedded in PR validation, not here.
@@ -12,7 +12,7 @@ from unittest.mock import patch
 
 import pytest
 
-from hermes_cli import security_audit as sa
+from forge_cli import security_audit as sa
 
 
 # ─── Parsers ──────────────────────────────────────────────────────────────────

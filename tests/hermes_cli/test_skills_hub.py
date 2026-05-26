@@ -5,7 +5,7 @@ import pytest
 from rich.console import Console
 
 from cli import ChatConsole
-from hermes_cli.skills_hub import do_check, do_install, do_list, do_update, handle_skills_slash
+from forge_cli.skills_hub import do_check, do_install, do_list, do_update, handle_skills_slash
 
 
 class _DummyLockFile:
@@ -82,7 +82,7 @@ def _capture_check(monkeypatch, results, name=None) -> str:
 
 def _capture_update(monkeypatch, results) -> tuple[str, list[tuple[str, str, bool]]]:
     import tools.skills_hub as hub
-    import hermes_cli.skills_hub as cli_hub
+    import forge_cli.skills_hub as cli_hub
 
     sink = StringIO()
     console = Console(file=sink, force_terminal=False, color_system=None)
@@ -550,7 +550,7 @@ def test_url_install_cancel_name_prompt_aborts(monkeypatch, tmp_path, hub_env):
 
 def test_existing_categories_skips_top_level_skills(monkeypatch, tmp_path, hub_env):
     import tools.skills_hub as hub
-    from hermes_cli.skills_hub import _existing_categories
+    from forge_cli.skills_hub import _existing_categories
 
     # Category bucket with nested skill.
     (hub.SKILLS_DIR / "productivity" / "notion").mkdir(parents=True)
@@ -575,7 +575,7 @@ def test_existing_categories_returns_empty_when_skills_dir_missing(monkeypatch, 
     import tools.skills_hub as hub
     monkeypatch.setattr(hub, "SKILLS_DIR", tmp_path / "does-not-exist")
 
-    from hermes_cli.skills_hub import _existing_categories
+    from forge_cli.skills_hub import _existing_categories
     assert _existing_categories() == []
 
 
@@ -592,7 +592,7 @@ def test_browse_skills_dedup_uses_identifier_not_name(monkeypatch):
     fix, each unique identifier produces a distinct result.
     """
     from tools.skills_hub import SkillMeta
-    from hermes_cli.skills_hub import browse_skills
+    from forge_cli.skills_hub import browse_skills
 
     airbnb = SkillMeta(
         name="search-listings", description="Airbnb search", source="browse-sh",
@@ -609,7 +609,7 @@ def test_browse_skills_dedup_uses_identifier_not_name(monkeypatch):
     })()
 
     # browse_skills() imports create_source_router locally from tools.skills_hub,
-    # so the patch must target the source module, not hermes_cli.skills_hub.
+    # so the patch must target the source module, not forge_cli.skills_hub.
     with patch("tools.skills_hub.create_source_router", return_value=[mock_src]):
         result = browse_skills(page=1, page_size=50)
 

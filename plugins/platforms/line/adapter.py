@@ -1282,7 +1282,7 @@ class LineAdapter(BasePlatformAdapter):
             return web.Response(status=404, text="not found")
 
         try:
-            from hermes_constants import get_hermes_home
+            from forge_constants import get_hermes_home
             hermes_home = Path(get_hermes_home()).resolve()
         except Exception:
             hermes_home = Path.home().joinpath(".hermes").resolve()
@@ -1565,7 +1565,7 @@ def interactive_setup() -> None:
     """Minimal stdin wizard for ``hermes setup line``.
 
     Mirrors the irc/teams style: prompts for the two required vars, plus
-    one optional public URL. Writes to ``~/.hermes/.env`` via ``hermes_cli.config``.
+    one optional public URL. Writes to ``~/.hermes/.env`` via ``forge_cli.config``.
     """
     print()
     print("LINE Messaging API setup")
@@ -1575,9 +1575,9 @@ def interactive_setup() -> None:
     print()
 
     try:
-        from hermes_cli.config import get_env_var, set_env_var
+        from forge_cli.config import get_env_var, set_env_var
     except ImportError:
-        print("hermes_cli.config not available; set LINE_* vars manually in ~/.hermes/.env")
+        print("forge_cli.config not available; set LINE_* vars manually in ~/.hermes/.env")
         return
 
     def _prompt(var: str, prompt: str, *, secret: bool = False) -> None:
@@ -1585,7 +1585,7 @@ def interactive_setup() -> None:
         suffix = " [keep current]" if existing else ""
         try:
             if secret:
-                from hermes_cli.secret_prompt import masked_secret_prompt
+                from forge_cli.secret_prompt import masked_secret_prompt
                 value = masked_secret_prompt(f"{prompt}{suffix}: ")
             else:
                 value = input(f"{prompt}{suffix}: ").strip()

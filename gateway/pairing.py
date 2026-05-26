@@ -32,7 +32,7 @@ from gateway.whatsapp_identity import (
     expand_whatsapp_aliases,
     normalize_whatsapp_identifier,
 )
-from hermes_constants import get_hermes_dir
+from forge_constants import get_hermes_dir
 from utils import atomic_replace
 
 

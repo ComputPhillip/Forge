@@ -39,7 +39,7 @@ class TestWriteDenyExactPaths:
         # ``~/.hermes``) must be write-denied. The hermetic test conftest
         # points HERMES_HOME at a tempdir — resolve via get_hermes_home()
         # to match the denylist.
-        from hermes_constants import get_hermes_home
+        from forge_constants import get_hermes_home
         path = str(get_hermes_home() / ".env")
         assert _is_write_denied(path) is True
 
@@ -62,7 +62,7 @@ class TestWriteDenyExactPaths:
         monkeypatch.setenv("HERMES_HOME", str(profile_home))
 
         # Sanity check: HERMES_HOME does point to the profile dir, not the root.
-        from hermes_constants import get_hermes_home, get_default_hermes_root
+        from forge_constants import get_hermes_home, get_default_hermes_root
         assert get_hermes_home() == profile_home
         assert get_default_hermes_root() == root
 

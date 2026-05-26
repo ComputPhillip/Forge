@@ -46,9 +46,9 @@ def hermes_home(tmp_path, monkeypatch):
     home.mkdir()
     monkeypatch.setenv("HERMES_HOME", str(home))
     # Some modules cache get_hermes_home; clear if needed.
-    import hermes_constants
-    if hasattr(hermes_constants, "_HERMES_HOME_CACHE"):
-        hermes_constants._HERMES_HOME_CACHE = None  # type: ignore[attr-defined]
+    import forge_constants
+    if hasattr(forge_constants, "_HERMES_HOME_CACHE"):
+        forge_constants._HERMES_HOME_CACHE = None  # type: ignore[attr-defined]
     return home
 
 
@@ -529,7 +529,7 @@ def test_env_loader_skips_when_disabled(tmp_path, monkeypatch):
     monkeypatch.setenv("HERMES_HOME", str(home))
     monkeypatch.setattr(Path, "home", lambda: tmp_path)
 
-    from hermes_cli.env_loader import _apply_external_secret_sources
+    from forge_cli.env_loader import _apply_external_secret_sources
     # Should be a no-op (returns None).
     assert _apply_external_secret_sources(home) is None
 
@@ -567,7 +567,7 @@ def test_env_loader_calls_bsm_when_enabled(tmp_path, monkeypatch):
         fake_apply,
     )
 
-    from hermes_cli.env_loader import _apply_external_secret_sources
+    from forge_cli.env_loader import _apply_external_secret_sources
     _apply_external_secret_sources(home)
 
     assert called["n"] == 1

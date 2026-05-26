@@ -34,7 +34,7 @@ from toolsets import TOOLSETS
 
 # Sentinel value used by the runtime provider system for providers that are
 # not natively known (named custom providers, third-party aggregators, etc.).
-# Must match hermes_cli.runtime_provider.RUNTIME_PROVIDER_TYPE_CUSTOM.
+# Must match forge_cli.runtime_provider.RUNTIME_PROVIDER_TYPE_CUSTOM.
 _RUNTIME_PROVIDER_CUSTOM = "custom"
 from tools import file_state
 from tools.terminal_tool import set_approval_callback as _set_subagent_approval_cb
@@ -1063,7 +1063,7 @@ def _build_child_agent(
     try:
         delegation_effort = str(delegation_cfg.get("reasoning_effort") or "").strip()
         if delegation_effort:
-            from hermes_constants import parse_reasoning_effort
+            from forge_constants import parse_reasoning_effort
 
             parsed = parse_reasoning_effort(delegation_effort)
             if parsed is not None:
@@ -1195,7 +1195,7 @@ def _dump_subagent_timeout_diagnostic(
     Returns the absolute path to the diagnostic file, or None on failure.
     """
     try:
-        from hermes_constants import get_hermes_home
+        from forge_constants import get_hermes_home
         import datetime as _dt
         import sys as _sys
         import traceback as _traceback
@@ -2245,7 +2245,7 @@ def delegate_task(
     # child was closed.
     _parent_session_id = getattr(parent_agent, "session_id", None)
     try:
-        from hermes_cli.plugins import invoke_hook as _invoke_hook
+        from forge_cli.plugins import invoke_hook as _invoke_hook
     except Exception:
         _invoke_hook = None
     # Aggregate child spend here so the parent's footer/UI reflect the true
@@ -2384,7 +2384,7 @@ def _resolve_delegation_credentials(cfg: dict, parent_agent) -> dict:
         # proxies — pick the right transport automatically. Without this,
         # subagents would default to chat_completions and hit 404s on endpoints
         # that only speak the Anthropic Messages protocol. Fixes #10213.
-        from hermes_cli.runtime_provider import _detect_api_mode_for_url
+        from forge_cli.runtime_provider import _detect_api_mode_for_url
 
         base_lower = configured_base_url.lower()
         provider = "custom"
@@ -2427,7 +2427,7 @@ def _resolve_delegation_credentials(cfg: dict, parent_agent) -> dict:
 
     # Provider is configured — resolve full credentials
     try:
-        from hermes_cli.runtime_provider import resolve_runtime_provider
+        from forge_cli.runtime_provider import resolve_runtime_provider
 
         runtime = resolve_runtime_provider(requested=configured_provider, target_model=configured_model)
     except Exception as exc:
@@ -2460,7 +2460,7 @@ def _load_config() -> dict:
     """Load delegation config from CLI_CONFIG or persistent config.
 
     Checks the runtime config (cli.py CLI_CONFIG) first, then falls back
-    to the persistent config (hermes_cli/config.py load_config()) so that
+    to the persistent config (forge_cli/config.py load_config()) so that
     ``delegation.model`` / ``delegation.provider`` are picked up regardless
     of the entry point (CLI, gateway, cron).
     """
@@ -2473,7 +2473,7 @@ def _load_config() -> dict:
     except Exception:
         pass
     try:
-        from hermes_cli.config import load_config
+        from forge_cli.config import load_config
 
         full = load_config()
         return full.get("delegation") or {}

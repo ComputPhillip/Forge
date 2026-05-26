@@ -1,9 +1,9 @@
-"""Unit tests for hermes_cli.xai_retirement (May 15, 2026 model retirement)."""
+"""Unit tests for forge_cli.xai_retirement (May 15, 2026 model retirement)."""
 from __future__ import annotations
 
 import pytest
 
-from hermes_cli.xai_retirement import (
+from forge_cli.xai_retirement import (
     MIGRATION_GUIDE_URL,
     RETIREMENT_DATE,
     RetirementIssue,

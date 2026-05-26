@@ -33,7 +33,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple
 
-from hermes_constants import get_hermes_home
+from forge_constants import get_hermes_home
 from agent.skill_utils import is_excluded_skill_path
 
 logger = logging.getLogger(__name__)

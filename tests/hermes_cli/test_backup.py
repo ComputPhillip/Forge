@@ -20,7 +20,7 @@ def _make_hermes_tree(root: Path) -> None:
     (root / "config.yaml").write_text("model:\n  provider: openrouter\n")
     (root / ".env").write_text("OPENROUTER_API_KEY=sk-test-123\n")
     (root / "memory_store.db").write_bytes(b"fake-sqlite")
-    (root / "hermes_state.db").write_bytes(b"fake-state")
+    (root / "forge_state.db").write_bytes(b"fake-state")
 
     # Sessions
     (root / "sessions").mkdir(exist_ok=True)
@@ -81,40 +81,40 @@ def _symlink_file_or_skip(link: Path, target: Path) -> None:
 
 class TestShouldExclude:
     def test_excludes_hermes_agent(self):
-        from hermes_cli.backup import _should_exclude
+        from forge_cli.backup import _should_exclude
         assert _should_exclude(Path("hermes-agent/run_agent.py"))
         assert _should_exclude(Path("hermes-agent/.git/HEAD"))
 
     def test_excludes_pycache(self):
-        from hermes_cli.backup import _should_exclude
+        from forge_cli.backup import _should_exclude
         assert _should_exclude(Path("plugins/__pycache__/mod.cpython-312.pyc"))
 
     def test_excludes_pyc_files(self):
-        from hermes_cli.backup import _should_exclude
+        from forge_cli.backup import _should_exclude
         assert _should_exclude(Path("some/module.pyc"))
 
     def test_excludes_pid_files(self):
-        from hermes_cli.backup import _should_exclude
+        from forge_cli.backup import _should_exclude
         assert _should_exclude(Path("gateway.pid"))
         assert _should_exclude(Path("cron.pid"))
 
     def test_excludes_checkpoints(self):
         """checkpoints/ is session-local trajectory cache — hash-keyed,
         regenerated per-session, won't port to another machine anyway."""
-        from hermes_cli.backup import _should_exclude
+        from forge_cli.backup import _should_exclude
         assert _should_exclude(Path("checkpoints/abc123/trajectory.json"))
         assert _should_exclude(Path("checkpoints/deadbeef/step_0001.json"))
 
     def test_excludes_backups_dir(self):
         """backups/ is excluded so pre-update backups don't nest exponentially."""
-        from hermes_cli.backup import _should_exclude
+        from forge_cli.backup import _should_exclude
         assert _should_exclude(Path("backups/pre-update-2026-04-27-063400.zip"))
 
     def test_excludes_sqlite_sidecars(self):
         """SQLite WAL/SHM/journal sidecars must not ship alongside the
         safe-copied .db — pairing a fresh snapshot with stale sidecar state
         produces a torn restore."""
-        from hermes_cli.backup import _should_exclude
+        from forge_cli.backup import _should_exclude
         assert _should_exclude(Path("state.db-wal"))
         assert _should_exclude(Path("state.db-shm"))
         assert _should_exclude(Path("state.db-journal"))
@@ -123,27 +123,27 @@ class TestShouldExclude:
         assert not _should_exclude(Path("state.db"))
 
     def test_includes_config(self):
-        from hermes_cli.backup import _should_exclude
+        from forge_cli.backup import _should_exclude
         assert not _should_exclude(Path("config.yaml"))
 
     def test_includes_env(self):
-        from hermes_cli.backup import _should_exclude
+        from forge_cli.backup import _should_exclude
         assert not _should_exclude(Path(".env"))
 
     def test_includes_skills(self):
-        from hermes_cli.backup import _should_exclude
+        from forge_cli.backup import _should_exclude
         assert not _should_exclude(Path("skills/my-skill/SKILL.md"))
 
     def test_includes_profiles(self):
-        from hermes_cli.backup import _should_exclude
+        from forge_cli.backup import _should_exclude
         assert not _should_exclude(Path("profiles/coder/config.yaml"))
 
     def test_includes_sessions(self):
-        from hermes_cli.backup import _should_exclude
+        from forge_cli.backup import _should_exclude
         assert not _should_exclude(Path("sessions/abc.json"))
 
     def test_includes_logs(self):
-        from hermes_cli.backup import _should_exclude
+        from forge_cli.backup import _should_exclude
         assert not _should_exclude(Path("logs/agent.log"))
 
 
@@ -165,7 +165,7 @@ class TestBackup:
         out_zip = tmp_path / "backup.zip"
         args = Namespace(output=str(out_zip))
 
-        from hermes_cli.backup import run_backup
+        from forge_cli.backup import run_backup
         run_backup(args)
 
         assert out_zip.exists()
@@ -198,7 +198,7 @@ class TestBackup:
         out_zip = tmp_path / "backup.zip"
         args = Namespace(output=str(out_zip))
 
-        from hermes_cli.backup import run_backup
+        from forge_cli.backup import run_backup
         run_backup(args)
 
         with zipfile.ZipFile(out_zip, "r") as zf:
@@ -218,7 +218,7 @@ class TestBackup:
         out_zip = tmp_path / "backup.zip"
         args = Namespace(output=str(out_zip))
 
-        from hermes_cli.backup import run_backup
+        from forge_cli.backup import run_backup
         run_backup(args)
 
         with zipfile.ZipFile(out_zip, "r") as zf:
@@ -238,7 +238,7 @@ class TestBackup:
         out_zip = tmp_path / "backup.zip"
         args = Namespace(output=str(out_zip))
 
-        from hermes_cli.backup import run_backup
+        from forge_cli.backup import run_backup
         run_backup(args)
 
         with zipfile.ZipFile(out_zip, "r") as zf:
@@ -257,7 +257,7 @@ class TestBackup:
 
         args = Namespace(output=None)
 
-        from hermes_cli.backup import run_backup
+        from forge_cli.backup import run_backup
         run_backup(args)
 
         # Should exist in home dir
@@ -279,7 +279,7 @@ class TestBackup:
         out_zip = tmp_path / "backup.zip"
         args = Namespace(output=str(out_zip))
 
-        from hermes_cli.backup import run_backup
+        from forge_cli.backup import run_backup
         run_backup(args)
 
         with zipfile.ZipFile(out_zip, "r") as zf:
@@ -300,7 +300,7 @@ class TestValidateBackupZip:
 
     def test_state_db_passes(self, tmp_path):
         """A zip containing state.db is accepted as a valid Hermes backup."""
-        from hermes_cli.backup import _validate_backup_zip
+        from forge_cli.backup import _validate_backup_zip
         zip_path = tmp_path / "backup.zip"
         self._make_zip(zip_path, ["state.db", "sessions/abc.json"])
         with zipfile.ZipFile(zip_path, "r") as zf:
@@ -308,17 +308,17 @@ class TestValidateBackupZip:
         assert ok, reason
 
     def test_old_wrong_db_name_fails(self, tmp_path):
-        """A zip with only hermes_state.db (old wrong name) is rejected."""
-        from hermes_cli.backup import _validate_backup_zip
+        """A zip with only forge_state.db (old wrong name) is rejected."""
+        from forge_cli.backup import _validate_backup_zip
         zip_path = tmp_path / "old.zip"
-        self._make_zip(zip_path, ["hermes_state.db", "memory_store.db"])
+        self._make_zip(zip_path, ["forge_state.db", "memory_store.db"])
         with zipfile.ZipFile(zip_path, "r") as zf:
             ok, reason = _validate_backup_zip(zf)
         assert not ok
 
     def test_config_yaml_passes(self, tmp_path):
         """A zip containing config.yaml is accepted (existing behaviour preserved)."""
-        from hermes_cli.backup import _validate_backup_zip
+        from forge_cli.backup import _validate_backup_zip
         zip_path = tmp_path / "backup.zip"
         self._make_zip(zip_path, ["config.yaml", "skills/x/SKILL.md"])
         with zipfile.ZipFile(zip_path, "r") as zf:
@@ -357,7 +357,7 @@ class TestImport:
 
         args = Namespace(zipfile=str(zip_path), force=True)
 
-        from hermes_cli.backup import run_import
+        from forge_cli.backup import run_import
         run_import(args)
 
         assert (hermes_home / "config.yaml").read_text() == "model:\n  provider: openrouter\n"
@@ -380,7 +380,7 @@ class TestImport:
 
         args = Namespace(zipfile=str(zip_path), force=True)
 
-        from hermes_cli.backup import run_import
+        from forge_cli.backup import run_import
         run_import(args)
 
         assert (hermes_home / "config.yaml").read_text() == "model: test\n"
@@ -399,7 +399,7 @@ class TestImport:
 
         args = Namespace(zipfile=str(zip_path), force=True)
 
-        from hermes_cli.backup import run_import
+        from forge_cli.backup import run_import
         with pytest.raises(SystemExit):
             run_import(args)
 
@@ -418,7 +418,7 @@ class TestImport:
 
         args = Namespace(zipfile=str(zip_path), force=True)
 
-        from hermes_cli.backup import run_import
+        from forge_cli.backup import run_import
         with pytest.raises(SystemExit):
             run_import(args)
 
@@ -438,7 +438,7 @@ class TestImport:
 
         args = Namespace(zipfile=str(zip_path), force=True)
 
-        from hermes_cli.backup import run_import
+        from forge_cli.backup import run_import
         run_import(args)
 
         # config.yaml should be restored
@@ -462,7 +462,7 @@ class TestImport:
 
         args = Namespace(zipfile=str(zip_path), force=False)
 
-        from hermes_cli.backup import run_import
+        from forge_cli.backup import run_import
         with patch("builtins.input", return_value="n"):
             run_import(args)
 
@@ -484,7 +484,7 @@ class TestImport:
 
         args = Namespace(zipfile=str(zip_path), force=True)
 
-        from hermes_cli.backup import run_import
+        from forge_cli.backup import run_import
         run_import(args)
 
         assert (hermes_home / "config.yaml").read_text() == "model: restored\n"
@@ -497,7 +497,7 @@ class TestImport:
 
         args = Namespace(zipfile=str(tmp_path / "nonexistent.zip"), force=True)
 
-        from hermes_cli.backup import run_import
+        from forge_cli.backup import run_import
         with pytest.raises(SystemExit):
             run_import(args)
 
@@ -520,7 +520,7 @@ class TestImport:
 
         args = Namespace(zipfile=str(zip_path), force=True)
 
-        from hermes_cli.backup import run_import
+        from forge_cli.backup import run_import
         run_import(args)
 
         for rel in (".env", "auth.json", "state.db", "profiles/coder/.env"):
@@ -545,7 +545,7 @@ class TestRoundTrip:
 
         # Backup
         out_zip = tmp_path / "roundtrip.zip"
-        from hermes_cli.backup import run_backup, run_import
+        from forge_cli.backup import run_backup, run_import
 
         run_backup(Namespace(output=str(out_zip)))
         assert out_zip.exists()
@@ -580,23 +580,23 @@ class TestRoundTrip:
 
 class TestFormatSize:
     def test_bytes(self):
-        from hermes_cli.backup import _format_size
+        from forge_cli.backup import _format_size
         assert _format_size(512) == "512 B"
 
     def test_kilobytes(self):
-        from hermes_cli.backup import _format_size
+        from forge_cli.backup import _format_size
         assert "KB" in _format_size(2048)
 
     def test_megabytes(self):
-        from hermes_cli.backup import _format_size
+        from forge_cli.backup import _format_size
         assert "MB" in _format_size(5 * 1024 * 1024)
 
     def test_gigabytes(self):
-        from hermes_cli.backup import _format_size
+        from forge_cli.backup import _format_size
         assert "GB" in _format_size(3 * 1024 ** 3)
 
     def test_terabytes(self):
-        from hermes_cli.backup import _format_size
+        from forge_cli.backup import _format_size
         assert "TB" in _format_size(2 * 1024 ** 4)
 
 
@@ -604,7 +604,7 @@ class TestValidation:
     def test_validate_with_config(self):
         """Zip with config.yaml passes validation."""
         import io
-        from hermes_cli.backup import _validate_backup_zip
+        from forge_cli.backup import _validate_backup_zip
 
         buf = io.BytesIO()
         with zipfile.ZipFile(buf, "w") as zf:
@@ -617,7 +617,7 @@ class TestValidation:
     def test_validate_with_env(self):
         """Zip with .env passes validation."""
         import io
-        from hermes_cli.backup import _validate_backup_zip
+        from forge_cli.backup import _validate_backup_zip
 
         buf = io.BytesIO()
         with zipfile.ZipFile(buf, "w") as zf:
@@ -630,7 +630,7 @@ class TestValidation:
     def test_validate_rejects_random(self):
         """Zip without hermes markers fails validation."""
         import io
-        from hermes_cli.backup import _validate_backup_zip
+        from forge_cli.backup import _validate_backup_zip
 
         buf = io.BytesIO()
         with zipfile.ZipFile(buf, "w") as zf:
@@ -643,7 +643,7 @@ class TestValidation:
     def test_detect_prefix_hermes(self):
         """Detects .hermes/ prefix wrapping all entries."""
         import io
-        from hermes_cli.backup import _detect_prefix
+        from forge_cli.backup import _detect_prefix
 
         buf = io.BytesIO()
         with zipfile.ZipFile(buf, "w") as zf:
@@ -656,7 +656,7 @@ class TestValidation:
     def test_detect_prefix_none(self):
         """No prefix when entries are at root."""
         import io
-        from hermes_cli.backup import _detect_prefix
+        from forge_cli.backup import _detect_prefix
 
         buf = io.BytesIO()
         with zipfile.ZipFile(buf, "w") as zf:
@@ -669,7 +669,7 @@ class TestValidation:
     def test_detect_prefix_only_dirs(self):
         """Prefix detection returns empty for zip with only directory entries."""
         import io
-        from hermes_cli.backup import _detect_prefix
+        from forge_cli.backup import _detect_prefix
 
         buf = io.BytesIO()
         with zipfile.ZipFile(buf, "w") as zf:
@@ -694,7 +694,7 @@ class TestBackupEdgeCases:
 
         args = Namespace(output=str(tmp_path / "out.zip"))
 
-        from hermes_cli.backup import run_backup
+        from forge_cli.backup import run_backup
         with pytest.raises(SystemExit):
             run_backup(args)
 
@@ -712,7 +712,7 @@ class TestBackupEdgeCases:
 
         args = Namespace(output=str(out_dir))
 
-        from hermes_cli.backup import run_backup
+        from forge_cli.backup import run_backup
         run_backup(args)
 
         zips = list(out_dir.glob("hermes-backup-*.zip"))
@@ -730,7 +730,7 @@ class TestBackupEdgeCases:
         out_path = tmp_path / "mybackup.tar"
         args = Namespace(output=str(out_path))
 
-        from hermes_cli.backup import run_backup
+        from forge_cli.backup import run_backup
         run_backup(args)
 
         # Should have .tar.zip suffix
@@ -749,7 +749,7 @@ class TestBackupEdgeCases:
 
         args = Namespace(output=str(tmp_path / "out.zip"))
 
-        from hermes_cli.backup import run_backup
+        from forge_cli.backup import run_backup
         run_backup(args)
 
         # No zip should be created
@@ -772,7 +772,7 @@ class TestBackupEdgeCases:
         out_zip = tmp_path / "out.zip"
         args = Namespace(output=str(out_zip))
 
-        from hermes_cli.backup import run_backup
+        from forge_cli.backup import run_backup
         try:
             run_backup(args)
         finally:
@@ -799,7 +799,7 @@ class TestBackupEdgeCases:
         out_zip = tmp_path / "out.zip"
         args = Namespace(output=str(out_zip))
 
-        from hermes_cli.backup import run_backup
+        from forge_cli.backup import run_backup
         run_backup(args)
 
         # Zip should still be created with the valid files
@@ -823,7 +823,7 @@ class TestBackupEdgeCases:
         out_zip = hermes_home / "backup.zip"
         args = Namespace(output=str(out_zip))
 
-        from hermes_cli.backup import run_backup
+        from forge_cli.backup import run_backup
         run_backup(args)
 
         # The zip should exist but not contain itself
@@ -849,7 +849,7 @@ class TestImportEdgeCases:
 
         args = Namespace(zipfile=str(not_zip), force=True)
 
-        from hermes_cli.backup import run_import
+        from forge_cli.backup import run_import
         with pytest.raises(SystemExit):
             run_import(args)
 
@@ -866,7 +866,7 @@ class TestImportEdgeCases:
 
         args = Namespace(zipfile=str(zip_path), force=False)
 
-        from hermes_cli.backup import run_import
+        from forge_cli.backup import run_import
         with patch("builtins.input", side_effect=EOFError):
             with pytest.raises(SystemExit):
                 run_import(args)
@@ -884,7 +884,7 @@ class TestImportEdgeCases:
 
         args = Namespace(zipfile=str(zip_path), force=False)
 
-        from hermes_cli.backup import run_import
+        from forge_cli.backup import run_import
         with patch("builtins.input", side_effect=KeyboardInterrupt):
             with pytest.raises(SystemExit):
                 run_import(args)
@@ -909,7 +909,7 @@ class TestImportEdgeCases:
 
         args = Namespace(zipfile=str(zip_path), force=True)
 
-        from hermes_cli.backup import run_import
+        from forge_cli.backup import run_import
         try:
             run_import(args)
         finally:
@@ -934,7 +934,7 @@ class TestImportEdgeCases:
 
         args = Namespace(zipfile=str(zip_path), force=True)
 
-        from hermes_cli.backup import run_import
+        from forge_cli.backup import run_import
         run_import(args)
 
         assert (hermes_home / "config.yaml").exists()
@@ -972,7 +972,7 @@ class TestProfileRestoration:
 
         args = Namespace(zipfile=str(zip_path), force=True)
 
-        from hermes_cli.backup import run_import
+        from forge_cli.backup import run_import
         run_import(args)
 
         # Profile directories should exist
@@ -1006,7 +1006,7 @@ class TestProfileRestoration:
 
         args = Namespace(zipfile=str(zip_path), force=True)
 
-        from hermes_cli.backup import run_import
+        from forge_cli.backup import run_import
         run_import(args)
 
         # Only valid profile should get a wrapper
@@ -1029,15 +1029,15 @@ class TestProfileRestoration:
         args = Namespace(zipfile=str(zip_path), force=True)
 
         # Simulate profiles module not being available
-        import hermes_cli.backup as backup_mod
+        import forge_cli.backup as backup_mod
         original_import = __builtins__.__import__ if hasattr(__builtins__, '__import__') else __import__
 
         def fake_import(name, *a, **kw):
-            if name == "hermes_cli.profiles":
+            if name == "forge_cli.profiles":
                 raise ImportError("no profiles module")
             return original_import(name, *a, **kw)
 
-        from hermes_cli.backup import run_import
+        from forge_cli.backup import run_import
         with patch("builtins.__import__", side_effect=fake_import):
             run_import(args)
 
@@ -1051,7 +1051,7 @@ class TestProfileRestoration:
 
 class TestSafeCopyDb:
     def test_copies_valid_database(self, tmp_path):
-        from hermes_cli.backup import _safe_copy_db
+        from forge_cli.backup import _safe_copy_db
         src = tmp_path / "test.db"
         dst = tmp_path / "copy.db"
 
@@ -1070,7 +1070,7 @@ class TestSafeCopyDb:
         assert rows == [(42,)]
 
     def test_copies_wal_mode_database(self, tmp_path):
-        from hermes_cli.backup import _safe_copy_db
+        from forge_cli.backup import _safe_copy_db
         src = tmp_path / "wal.db"
         dst = tmp_path / "copy.db"
 
@@ -1116,7 +1116,7 @@ class TestQuickSnapshot:
         return home
 
     def test_creates_snapshot(self, hermes_home):
-        from hermes_cli.backup import create_quick_snapshot
+        from forge_cli.backup import create_quick_snapshot
         snap_id = create_quick_snapshot(hermes_home=hermes_home)
         assert snap_id is not None
         snap_dir = hermes_home / "state-snapshots" / snap_id
@@ -1124,12 +1124,12 @@ class TestQuickSnapshot:
         assert (snap_dir / "manifest.json").exists()
 
     def test_label_in_id(self, hermes_home):
-        from hermes_cli.backup import create_quick_snapshot
+        from forge_cli.backup import create_quick_snapshot
         snap_id = create_quick_snapshot(label="before-upgrade", hermes_home=hermes_home)
         assert "before-upgrade" in snap_id
 
     def test_state_db_safely_copied(self, hermes_home):
-        from hermes_cli.backup import create_quick_snapshot
+        from forge_cli.backup import create_quick_snapshot
         snap_id = create_quick_snapshot(hermes_home=hermes_home)
         db_copy = hermes_home / "state-snapshots" / snap_id / "state.db"
         assert db_copy.exists()
@@ -1141,12 +1141,12 @@ class TestQuickSnapshot:
         assert rows[0] == ("s1", "hello world")
 
     def test_copies_nested_files(self, hermes_home):
-        from hermes_cli.backup import create_quick_snapshot
+        from forge_cli.backup import create_quick_snapshot
         snap_id = create_quick_snapshot(hermes_home=hermes_home)
         assert (hermes_home / "state-snapshots" / snap_id / "cron" / "jobs.json").exists()
 
     def test_missing_files_skipped(self, hermes_home):
-        from hermes_cli.backup import create_quick_snapshot
+        from forge_cli.backup import create_quick_snapshot
         snap_id = create_quick_snapshot(hermes_home=hermes_home)
         with open(hermes_home / "state-snapshots" / snap_id / "manifest.json") as f:
             meta = json.load(f)
@@ -1154,13 +1154,13 @@ class TestQuickSnapshot:
         assert "gateway_state.json" not in meta["files"]
 
     def test_empty_home_returns_none(self, tmp_path):
-        from hermes_cli.backup import create_quick_snapshot
+        from forge_cli.backup import create_quick_snapshot
         empty = tmp_path / "empty"
         empty.mkdir()
         assert create_quick_snapshot(hermes_home=empty) is None
 
     def test_list_snapshots(self, hermes_home):
-        from hermes_cli.backup import create_quick_snapshot, list_quick_snapshots
+        from forge_cli.backup import create_quick_snapshot, list_quick_snapshots
         id1 = create_quick_snapshot(label="first", hermes_home=hermes_home)
         id2 = create_quick_snapshot(label="second", hermes_home=hermes_home)
 
@@ -1170,14 +1170,14 @@ class TestQuickSnapshot:
         assert snaps[1]["id"] == id1
 
     def test_list_limit(self, hermes_home):
-        from hermes_cli.backup import create_quick_snapshot, list_quick_snapshots
+        from forge_cli.backup import create_quick_snapshot, list_quick_snapshots
         for i in range(5):
             create_quick_snapshot(label=f"s{i}", hermes_home=hermes_home)
         snaps = list_quick_snapshots(limit=3, hermes_home=hermes_home)
         assert len(snaps) == 3
 
     def test_restore_config(self, hermes_home):
-        from hermes_cli.backup import create_quick_snapshot, restore_quick_snapshot
+        from forge_cli.backup import create_quick_snapshot, restore_quick_snapshot
         snap_id = create_quick_snapshot(hermes_home=hermes_home)
 
         (hermes_home / "config.yaml").write_text("model:\n  provider: anthropic\n")
@@ -1188,7 +1188,7 @@ class TestQuickSnapshot:
         assert "openrouter" in (hermes_home / "config.yaml").read_text()
 
     def test_restore_state_db(self, hermes_home):
-        from hermes_cli.backup import create_quick_snapshot, restore_quick_snapshot
+        from forge_cli.backup import create_quick_snapshot, restore_quick_snapshot
         snap_id = create_quick_snapshot(hermes_home=hermes_home)
 
         conn = sqlite3.connect(str(hermes_home / "state.db"))
@@ -1204,18 +1204,18 @@ class TestQuickSnapshot:
         assert len(rows) == 1
 
     def test_restore_nonexistent(self, hermes_home):
-        from hermes_cli.backup import restore_quick_snapshot
+        from forge_cli.backup import restore_quick_snapshot
         assert restore_quick_snapshot("nonexistent", hermes_home=hermes_home) is False
 
     def test_auto_prune(self, hermes_home):
-        from hermes_cli.backup import create_quick_snapshot, list_quick_snapshots, _QUICK_DEFAULT_KEEP
+        from forge_cli.backup import create_quick_snapshot, list_quick_snapshots, _QUICK_DEFAULT_KEEP
         for i in range(_QUICK_DEFAULT_KEEP + 5):
             create_quick_snapshot(label=f"snap-{i:03d}", hermes_home=hermes_home)
         snaps = list_quick_snapshots(limit=100, hermes_home=hermes_home)
         assert len(snaps) <= _QUICK_DEFAULT_KEEP
 
     def test_manual_prune(self, hermes_home):
-        from hermes_cli.backup import create_quick_snapshot, prune_quick_snapshots, list_quick_snapshots
+        from forge_cli.backup import create_quick_snapshot, prune_quick_snapshots, list_quick_snapshots
         for i in range(10):
             create_quick_snapshot(label=f"s{i}", hermes_home=hermes_home)
         deleted = prune_quick_snapshots(keep=3, hermes_home=hermes_home)
@@ -1226,7 +1226,7 @@ class TestQuickSnapshot:
         """Pairing JSONs live outside state.db — snapshot must capture them
         recursively (generic + per-platform) so approved-user lists survive
         disasters like #15733."""
-        from hermes_cli.backup import create_quick_snapshot
+        from forge_cli.backup import create_quick_snapshot
 
         # Generic pairing store (new location)
         (hermes_home / "platforms" / "pairing").mkdir(parents=True)
@@ -1265,7 +1265,7 @@ class TestQuickSnapshot:
 
     def test_restore_recovers_pairing_data(self, hermes_home):
         """After restore, deleted pairing files reappear with original content."""
-        from hermes_cli.backup import create_quick_snapshot, restore_quick_snapshot
+        from forge_cli.backup import create_quick_snapshot, restore_quick_snapshot
 
         pairing_dir = hermes_home / "platforms" / "pairing"
         pairing_dir.mkdir(parents=True)
@@ -1291,7 +1291,7 @@ class TestQuickSnapshot:
 
     def test_empty_pairing_dir_does_not_fail(self, hermes_home):
         """An empty pairing directory should be silently skipped."""
-        from hermes_cli.backup import create_quick_snapshot
+        from forge_cli.backup import create_quick_snapshot
 
         (hermes_home / "platforms" / "pairing").mkdir(parents=True)
         # Directory exists but contains no files.
@@ -1315,7 +1315,7 @@ class TestPreUpdateBackup:
         return root
 
     def test_creates_backup_under_backups_dir(self, hermes_home):
-        from hermes_cli.backup import create_pre_update_backup
+        from forge_cli.backup import create_pre_update_backup
         out = create_pre_update_backup(hermes_home=hermes_home)
         assert out is not None
         assert out.exists()
@@ -1326,7 +1326,7 @@ class TestPreUpdateBackup:
     def test_backup_contents_match_full_backup(self, hermes_home):
         """Pre-update backup should include the same user data that
         ``hermes backup`` would, and should exclude the same directories."""
-        from hermes_cli.backup import create_pre_update_backup
+        from forge_cli.backup import create_pre_update_backup
         out = create_pre_update_backup(hermes_home=hermes_home)
         assert out is not None
         with zipfile.ZipFile(out) as zf:
@@ -1347,7 +1347,7 @@ class TestPreUpdateBackup:
     def test_does_not_recurse_into_prior_backups(self, hermes_home):
         """The ``backups/`` directory must be excluded so that each backup
         doesn't grow exponentially by including all prior backups."""
-        from hermes_cli.backup import create_pre_update_backup
+        from forge_cli.backup import create_pre_update_backup
         # First backup
         out1 = create_pre_update_backup(hermes_home=hermes_home)
         assert out1 is not None
@@ -1365,7 +1365,7 @@ class TestPreUpdateBackup:
         """After more than ``keep`` backups are created, older ones are
         pruned automatically."""
         import time as _t
-        from hermes_cli.backup import create_pre_update_backup
+        from forge_cli.backup import create_pre_update_backup
 
         created = []
         for _ in range(5):
@@ -1388,7 +1388,7 @@ class TestPreUpdateBackup:
         """Hand-dropped zips in ``backups/`` must not be touched by
         rotation — it only prunes files matching ``pre-update-*.zip``."""
         import time as _t
-        from hermes_cli.backup import create_pre_update_backup
+        from forge_cli.backup import create_pre_update_backup
 
         (hermes_home / "backups").mkdir(exist_ok=True)
         manual = hermes_home / "backups" / "my-manual.zip"
@@ -1401,7 +1401,7 @@ class TestPreUpdateBackup:
         assert manual.exists(), "Manual backup zip was incorrectly pruned"
 
     def test_returns_none_if_root_missing(self, tmp_path):
-        from hermes_cli.backup import create_pre_update_backup
+        from forge_cli.backup import create_pre_update_backup
         assert create_pre_update_backup(hermes_home=tmp_path / "does-not-exist") is None
 
     def test_keep_zero_does_not_delete_freshly_created_backup(self, hermes_home):
@@ -1411,7 +1411,7 @@ class TestPreUpdateBackup:
         regardless of misconfiguration; users who don't want backups should
         set ``pre_update_backup: false`` instead.
         """
-        from hermes_cli.backup import create_pre_update_backup
+        from forge_cli.backup import create_pre_update_backup
         out = create_pre_update_backup(hermes_home=hermes_home, keep=0)
         assert out is not None
         assert out.exists(), (
@@ -1422,7 +1422,7 @@ class TestPreUpdateBackup:
     def test_keep_negative_does_not_delete_freshly_created_backup(self, hermes_home):
         """Mirror coverage: any value <1 should be floored, not literally
         applied as a slice index."""
-        from hermes_cli.backup import create_pre_update_backup
+        from forge_cli.backup import create_pre_update_backup
         out = create_pre_update_backup(hermes_home=hermes_home, keep=-3)
         assert out is not None
         assert out.exists()
@@ -1433,7 +1433,7 @@ class TestPreUpdateBackup:
         still remove pre-existing backups beyond the (floored) limit of 1.
         """
         import time as _t
-        from hermes_cli.backup import create_pre_update_backup
+        from forge_cli.backup import create_pre_update_backup
 
         first = create_pre_update_backup(hermes_home=hermes_home, keep=5)
         _t.sleep(1.05)
@@ -1453,7 +1453,7 @@ class TestPreUpdateBackup:
 
     def test_skips_symlinked_files(self, hermes_home, tmp_path):
         """Pre-update backups must not dereference symlinks outside HERMES_HOME."""
-        from hermes_cli.backup import create_pre_update_backup
+        from forge_cli.backup import create_pre_update_backup
 
         outside = tmp_path / "outside-secret.txt"
         outside.write_text("outside secret\n")
@@ -1480,15 +1480,15 @@ class TestRunPreUpdateBackup:
         monkeypatch.setenv("HERMES_HOME", str(root))
         # Make Path.home() point at tmp_path for anything that uses it
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
-        # Bust caches for hermes_cli.config + hermes_constants so they pick up HERMES_HOME
+        # Bust caches for forge_cli.config + forge_constants so they pick up HERMES_HOME
         for mod in list(__import__("sys").modules.keys()):
-            if mod.startswith("hermes_cli.config") or mod == "hermes_constants":
+            if mod.startswith("forge_cli.config") or mod == "forge_constants":
                 del __import__("sys").modules[mod]
         return root
 
     def test_backup_flag_creates_backup(self, hermes_home, capsys):
         """--backup forces the pre-update backup for one run even when config is off."""
-        from hermes_cli.main import _run_pre_update_backup
+        from forge_cli.main import _run_pre_update_backup
         _run_pre_update_backup(Namespace(no_backup=False, backup=True))
         out = capsys.readouterr().out
         assert "Creating pre-update backup" in out
@@ -1503,7 +1503,7 @@ class TestRunPreUpdateBackup:
     def test_default_disabled_is_silent(self, hermes_home, capsys):
         """With the default-off config and no --backup flag, the hook is silent
         and creates no backup.  This is the common case for every update."""
-        from hermes_cli.main import _run_pre_update_backup
+        from forge_cli.main import _run_pre_update_backup
         _run_pre_update_backup(Namespace(no_backup=False, backup=False))
         out = capsys.readouterr().out
         assert out == ""
@@ -1512,7 +1512,7 @@ class TestRunPreUpdateBackup:
         )
 
     def test_no_backup_flag_skips(self, hermes_home, capsys):
-        from hermes_cli.main import _run_pre_update_backup
+        from forge_cli.main import _run_pre_update_backup
         _run_pre_update_backup(Namespace(no_backup=True, backup=False))
         out = capsys.readouterr().out
         assert "skipped (--no-backup)" in out
@@ -1532,10 +1532,10 @@ class TestRunPreUpdateBackup:
         }))
         import sys as _sys
         for mod in list(_sys.modules.keys()):
-            if mod.startswith("hermes_cli.config"):
+            if mod.startswith("forge_cli.config"):
                 del _sys.modules[mod]
 
-        from hermes_cli.main import _run_pre_update_backup
+        from forge_cli.main import _run_pre_update_backup
         _run_pre_update_backup(Namespace(no_backup=False, backup=False))
         out = capsys.readouterr().out
         assert "Creating pre-update backup" in out
@@ -1554,10 +1554,10 @@ class TestRunPreUpdateBackup:
         # Ensure config module re-reads
         import sys as _sys
         for mod in list(_sys.modules.keys()):
-            if mod.startswith("hermes_cli.config"):
+            if mod.startswith("forge_cli.config"):
                 del _sys.modules[mod]
 
-        from hermes_cli.main import _run_pre_update_backup
+        from forge_cli.main import _run_pre_update_backup
         _run_pre_update_backup(Namespace(no_backup=False, backup=False))
         out = capsys.readouterr().out
         assert out == ""
@@ -1573,10 +1573,10 @@ class TestRunPreUpdateBackup:
         }))
         import sys as _sys
         for mod in list(_sys.modules.keys()):
-            if mod.startswith("hermes_cli.config"):
+            if mod.startswith("forge_cli.config"):
                 del _sys.modules[mod]
 
-        from hermes_cli.main import _run_pre_update_backup
+        from forge_cli.main import _run_pre_update_backup
         _run_pre_update_backup(Namespace(no_backup=True, backup=False))
         out = capsys.readouterr().out
         assert "skipped (--no-backup)" in out
@@ -1598,7 +1598,7 @@ class TestPreMigrationBackup:
         return root
 
     def test_creates_backup_under_backups_dir(self, hermes_home):
-        from hermes_cli.backup import create_pre_migration_backup
+        from forge_cli.backup import create_pre_migration_backup
         out = create_pre_migration_backup(hermes_home=hermes_home)
         assert out is not None
         assert out.exists()
@@ -1611,7 +1611,7 @@ class TestPreMigrationBackup:
     def test_backup_uses_shared_exclusion_rules(self, hermes_home):
         """Pre-migration backup reuses the same exclusion rules as
         ``hermes backup`` / ``create_pre_update_backup`` — no drift."""
-        from hermes_cli.backup import create_pre_migration_backup
+        from forge_cli.backup import create_pre_migration_backup
         out = create_pre_migration_backup(hermes_home=hermes_home)
         assert out is not None
         with zipfile.ZipFile(out) as zf:
@@ -1628,7 +1628,7 @@ class TestPreMigrationBackup:
     def test_restorable_with_hermes_import(self, hermes_home, tmp_path):
         """The zip produced by pre-migration backup must be a valid Hermes
         backup — `hermes import` should accept it."""
-        from hermes_cli.backup import create_pre_migration_backup, _validate_backup_zip
+        from forge_cli.backup import create_pre_migration_backup, _validate_backup_zip
         out = create_pre_migration_backup(hermes_home=hermes_home)
         assert out is not None
         with zipfile.ZipFile(out) as zf:
@@ -1636,7 +1636,7 @@ class TestPreMigrationBackup:
         assert valid, "pre-migration zip failed _validate_backup_zip"
 
     def test_does_not_recurse_into_prior_backups(self, hermes_home):
-        from hermes_cli.backup import create_pre_migration_backup
+        from forge_cli.backup import create_pre_migration_backup
         out1 = create_pre_migration_backup(hermes_home=hermes_home)
         assert out1 is not None
         out2 = create_pre_migration_backup(hermes_home=hermes_home)
@@ -1647,7 +1647,7 @@ class TestPreMigrationBackup:
 
     def test_rotation_keeps_only_n(self, hermes_home):
         import time as _t
-        from hermes_cli.backup import create_pre_migration_backup
+        from forge_cli.backup import create_pre_migration_backup
 
         created = []
         for _ in range(7):
@@ -1661,7 +1661,7 @@ class TestPreMigrationBackup:
 
     def test_missing_hermes_home_returns_none(self, tmp_path):
         """Fresh install with no ~/.hermes yet — nothing to back up."""
-        from hermes_cli.backup import create_pre_migration_backup
+        from forge_cli.backup import create_pre_migration_backup
         missing = tmp_path / "does-not-exist"
         out = create_pre_migration_backup(hermes_home=missing)
         assert out is None
@@ -1669,7 +1669,7 @@ class TestPreMigrationBackup:
     def test_does_not_touch_pre_update_backups(self, hermes_home):
         """Pre-migration rotation must only prune pre-migration-*.zip files,
         leaving pre-update-*.zip backups untouched."""
-        from hermes_cli.backup import create_pre_update_backup, create_pre_migration_backup
+        from forge_cli.backup import create_pre_update_backup, create_pre_migration_backup
         update_backup = create_pre_update_backup(hermes_home=hermes_home, keep=5)
         assert update_backup is not None and update_backup.exists()
         # Spin up a lot of migration backups with keep=1

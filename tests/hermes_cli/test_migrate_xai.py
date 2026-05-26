@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from hermes_cli.xai_retirement import (
+from forge_cli.xai_retirement import (
     RetirementIssue,
     apply_migration,
     find_retired_xai_refs,

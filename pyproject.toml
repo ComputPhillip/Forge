@@ -218,23 +218,22 @@ all = [
 ]
 
 [project.scripts]
-# Forge primary entry points
-forge       = "hermes_cli.main:main"
+# Forge primary entry points (post-deep-rename: now point at forge_cli/)
+forge       = "forge_cli.main:main"
 forge-agent = "run_agent:main"
 forge-acp   = "acp_adapter.entry:main"
-# hermes-* aliases preserved during the surface-rebrand transition so
-# muscle memory from upstream still works and migration scripts don't
-# fail on a missing binary. These will be removed in a future major
-# version once the deep internal rename lands.
-hermes       = "hermes_cli.main:main"
+# hermes-* aliases preserved for muscle memory from upstream so existing
+# scripts/aliases don't break overnight. Both forge and hermes binaries
+# invoke the same forge_cli.main:main entry point.
+hermes       = "forge_cli.main:main"
 hermes-agent = "run_agent:main"
 hermes-acp   = "acp_adapter.entry:main"
 
 [tool.setuptools]
-py-modules = ["run_agent", "model_tools", "toolsets", "batch_runner", "trajectory_compressor", "toolset_distributions", "cli", "hermes_bootstrap", "hermes_constants", "hermes_state", "hermes_time", "hermes_logging", "utils"]
+py-modules = ["run_agent", "model_tools", "toolsets", "batch_runner", "trajectory_compressor", "toolset_distributions", "cli", "forge_bootstrap", "forge_constants", "forge_state", "forge_time", "forge_logging", "utils"]
 
 [tool.setuptools.package-data]
-hermes_cli = ["web_dist/**/*", "tui_dist/**/*", "scripts/install.sh", "scripts/install.ps1"]
+forge_cli = ["web_dist/**/*", "tui_dist/**/*", "scripts/install.sh", "scripts/install.ps1"]
 gateway = ["assets/**/*"]
 plugins = [
   "*/dashboard/manifest.json",
@@ -243,7 +242,7 @@ plugins = [
 ]
 
 [tool.setuptools.packages.find]
-include = ["agent", "agent.*", "tools", "tools.*", "hermes_cli", "gateway", "gateway.*", "tui_gateway", "tui_gateway.*", "cron", "acp_adapter", "plugins", "plugins.*", "providers", "providers.*"]
+include = ["agent", "agent.*", "tools", "tools.*", "forge_cli", "gateway", "gateway.*", "tui_gateway", "tui_gateway.*", "cron", "acp_adapter", "plugins", "plugins.*", "providers", "providers.*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

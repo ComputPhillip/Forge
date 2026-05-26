@@ -1,4 +1,4 @@
-"""Tests for hermes_cli.container_boot — the cont-init.d-time
+"""Tests for forge_cli.container_boot — the cont-init.d-time
 reconciliation that recreates per-profile gateway s6 service slots
 from the persistent profiles directory.
 
@@ -14,7 +14,7 @@ from pathlib import Path
 
 import pytest
 
-from hermes_cli.container_boot import (
+from forge_cli.container_boot import (
     ReconcileAction,
     reconcile_profile_gateways,
 )
@@ -229,7 +229,7 @@ def test_reconcile_log_rotates_when_size_exceeded(
 ) -> None:
     """When container-boot.log exceeds _LOG_ROTATE_BYTES, the existing
     file is rotated to .1 before the new entries are appended."""
-    from hermes_cli import container_boot
+    from forge_cli import container_boot
 
     # Tighten the threshold so we don't have to write 256 KiB.
     monkeypatch.setattr(container_boot, "_LOG_ROTATE_BYTES", 200)
@@ -259,7 +259,7 @@ def test_reconcile_log_does_not_rotate_below_threshold(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """A small existing log is appended to in place; no .1 is created."""
-    from hermes_cli import container_boot
+    from forge_cli import container_boot
     monkeypatch.setattr(container_boot, "_LOG_ROTATE_BYTES", 10_000_000)
 
     log_path = tmp_path / "logs" / "container-boot.log"
@@ -285,7 +285,7 @@ def test_reconcile_log_rotation_overwrites_existing_dot1(
 ) -> None:
     """Rotating again replaces the prior .1 — we keep at most one
     rotated file (soft cap of ~2 × threshold)."""
-    from hermes_cli import container_boot
+    from forge_cli import container_boot
     monkeypatch.setattr(container_boot, "_LOG_ROTATE_BYTES", 200)
 
     log_dir = tmp_path / "logs"; log_dir.mkdir()

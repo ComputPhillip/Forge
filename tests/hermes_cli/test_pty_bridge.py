@@ -1,4 +1,4 @@
-"""Unit tests for hermes_cli.pty_bridge — PTY spawning + byte forwarding.
+"""Unit tests for forge_cli.pty_bridge — PTY spawning + byte forwarding.
 
 These tests drive the bridge with minimal POSIX processes (echo, env, sleep,
 printf) to verify it behaves like a PTY you can read/write/resize/close.
@@ -15,7 +15,7 @@ import pytest
 
 pytest.importorskip("ptyprocess", reason="ptyprocess not installed")
 
-from hermes_cli.pty_bridge import PtyBridge, PtyUnavailableError
+from forge_cli.pty_bridge import PtyBridge, PtyUnavailableError
 
 
 skip_on_windows = pytest.mark.skipif(

@@ -40,7 +40,7 @@ from acp.schema import (
 from acp_adapter.auth import TERMINAL_SETUP_AUTH_METHOD_ID
 from acp_adapter.server import HermesACPAgent, HERMES_VERSION
 from acp_adapter.session import SessionManager
-from hermes_state import SessionDB
+from forge_state import SessionDB
 
 
 @pytest.fixture()
@@ -247,7 +247,7 @@ class TestSessionOps:
         acp_agent = HermesACPAgent(session_manager=manager)
 
         with patch(
-            "hermes_cli.models.curated_models_for_provider",
+            "forge_cli.models.curated_models_for_provider",
             return_value=[("gpt-5.4", "recommended"), ("gpt-5.4-mini", "")],
         ):
             resp = await acp_agent.new_session(cwd="/tmp")
@@ -964,11 +964,11 @@ class TestSessionConfiguration:
                 api_mode=kwargs.get("api_mode"),
             )
 
-        monkeypatch.setattr("hermes_cli.config.load_config", lambda: {
+        monkeypatch.setattr("forge_cli.config.load_config", lambda: {
             "model": {"provider": "openrouter", "default": "openrouter/gpt-5"}
         })
         monkeypatch.setattr(
-            "hermes_cli.runtime_provider.resolve_runtime_provider",
+            "forge_cli.runtime_provider.resolve_runtime_provider",
             fake_resolve_runtime_provider,
         )
         # Pin the parser so this test doesn't depend on live
@@ -976,11 +976,11 @@ class TestSessionConfiguration:
         # (sibling of the same hardening on
         # ``test_model_switch_uses_requested_provider``).
         monkeypatch.setattr(
-            "hermes_cli.models.parse_model_input",
+            "forge_cli.models.parse_model_input",
             lambda raw, current: ("anthropic", "claude-sonnet-4-6"),
         )
         monkeypatch.setattr(
-            "hermes_cli.models.detect_provider_for_model",
+            "forge_cli.models.detect_provider_for_model",
             lambda model, current: None,
         )
         manager = SessionManager(db=SessionDB(tmp_path / "state.db"))
@@ -1590,11 +1590,11 @@ class TestSlashCommands:
                 api_mode=kwargs.get("api_mode"),
             )
 
-        monkeypatch.setattr("hermes_cli.config.load_config", lambda: {
+        monkeypatch.setattr("forge_cli.config.load_config", lambda: {
             "model": {"provider": "openrouter", "default": "openrouter/gpt-5"}
         })
         monkeypatch.setattr(
-            "hermes_cli.runtime_provider.resolve_runtime_provider",
+            "forge_cli.runtime_provider.resolve_runtime_provider",
             fake_resolve_runtime_provider,
         )
         # Pin the model-string parser independently of the live
@@ -1604,11 +1604,11 @@ class TestSlashCommands:
         # ``anthropic``) flakes this one — observed once in CI as
         # ``'custom' == 'anthropic'``.
         monkeypatch.setattr(
-            "hermes_cli.models.parse_model_input",
+            "forge_cli.models.parse_model_input",
             lambda raw, current: ("anthropic", "claude-sonnet-4-6"),
         )
         monkeypatch.setattr(
-            "hermes_cli.models.detect_provider_for_model",
+            "forge_cli.models.detect_provider_for_model",
             lambda model, current: None,
         )
         manager = SessionManager(db=SessionDB(tmp_path / "state.db"))

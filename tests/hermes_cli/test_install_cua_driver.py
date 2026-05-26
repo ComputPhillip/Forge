@@ -22,7 +22,7 @@ from unittest.mock import MagicMock, patch
 
 class TestInstallCuaDriverUpgrade:
     def test_upgrade_on_non_macos_is_silent_noop(self):
-        from hermes_cli import tools_config
+        from forge_cli import tools_config
 
         with patch.object(tools_config, "_print_warning") as warn, \
              patch("platform.system", return_value="Linux"):
@@ -30,7 +30,7 @@ class TestInstallCuaDriverUpgrade:
             warn.assert_not_called()
 
     def test_non_upgrade_on_non_macos_warns(self):
-        from hermes_cli import tools_config
+        from forge_cli import tools_config
 
         with patch.object(tools_config, "_print_warning") as warn, \
              patch("platform.system", return_value="Linux"):
@@ -38,7 +38,7 @@ class TestInstallCuaDriverUpgrade:
             warn.assert_called()
 
     def test_upgrade_on_macos_with_binary_runs_installer(self):
-        from hermes_cli import tools_config
+        from forge_cli import tools_config
 
         with patch("platform.system", return_value="Darwin"), \
              patch.object(tools_config.shutil, "which",
@@ -55,7 +55,7 @@ class TestInstallCuaDriverUpgrade:
             assert kwargs.get("verbose") is False
 
     def test_upgrade_on_macos_without_binary_runs_installer(self):
-        from hermes_cli import tools_config
+        from forge_cli import tools_config
 
         with patch("platform.system", return_value="Darwin"), \
              patch.object(tools_config.shutil, "which",
@@ -68,7 +68,7 @@ class TestInstallCuaDriverUpgrade:
             runner.assert_called_once()
 
     def test_non_upgrade_on_macos_with_binary_skips_install(self):
-        from hermes_cli import tools_config
+        from forge_cli import tools_config
 
         with patch("platform.system", return_value="Darwin"), \
              patch.object(tools_config.shutil, "which",
@@ -80,7 +80,7 @@ class TestInstallCuaDriverUpgrade:
             runner.assert_not_called()
 
     def test_non_upgrade_on_macos_without_binary_runs_installer(self):
-        from hermes_cli import tools_config
+        from forge_cli import tools_config
 
         with patch("platform.system", return_value="Darwin"), \
              patch.object(tools_config.shutil, "which",
@@ -94,13 +94,13 @@ class TestInstallCuaDriverUpgrade:
 
 class TestCheckCuaDriverAssetForArch:
     def test_arm64_always_returns_true(self):
-        from hermes_cli import tools_config
+        from forge_cli import tools_config
 
         with patch("platform.machine", return_value="arm64"):
             assert tools_config._check_cua_driver_asset_for_arch() is True
 
     def test_x86_64_with_asset_returns_true(self):
-        from hermes_cli import tools_config
+        from forge_cli import tools_config
 
         release = {
             "tag_name": "cua-driver-v0.1.6",
@@ -119,7 +119,7 @@ class TestCheckCuaDriverAssetForArch:
             assert tools_config._check_cua_driver_asset_for_arch() is True
 
     def test_x86_64_without_asset_returns_false(self):
-        from hermes_cli import tools_config
+        from forge_cli import tools_config
 
         release = {
             "tag_name": "cua-driver-v0.1.6",
@@ -143,7 +143,7 @@ class TestCheckCuaDriverAssetForArch:
 
     def test_x86_64_api_failure_returns_true(self):
         """Network failure should fail open — let the installer handle it."""
-        from hermes_cli import tools_config
+        from forge_cli import tools_config
 
         with patch("platform.machine", return_value="x86_64"), \
              patch("urllib.request.urlopen", side_effect=Exception("timeout")):
@@ -151,7 +151,7 @@ class TestCheckCuaDriverAssetForArch:
 
     def test_fresh_install_x86_64_no_asset_skips_installer(self):
         """When the latest release has no Intel asset, skip the installer."""
-        from hermes_cli import tools_config
+        from forge_cli import tools_config
 
         release = {
             "tag_name": "cua-driver-v0.1.6",
@@ -175,7 +175,7 @@ class TestCheckCuaDriverAssetForArch:
 
     def test_upgrade_x86_64_no_asset_returns_existing_status(self):
         """On upgrade with no Intel asset, return whether binary existed."""
-        from hermes_cli import tools_config
+        from forge_cli import tools_config
 
         release = {
             "tag_name": "cua-driver-v0.1.6",

@@ -13,14 +13,14 @@ from dataclasses import dataclass, fields, replace
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Set, Tuple
 
-from hermes_constants import OPENROUTER_BASE_URL
-from hermes_cli.config import get_env_value, load_env
+from forge_constants import OPENROUTER_BASE_URL
+from forge_cli.config import get_env_value, load_env
 from agent.credential_persistence import (
     is_borrowed_credential_source,
     sanitize_borrowed_credential_payload,
 )
-import hermes_cli.auth as auth_mod
-from hermes_cli.auth import (
+import forge_cli.auth as auth_mod
+from forge_cli.auth import (
     CODEX_ACCESS_TOKEN_REFRESH_SKEW_SECONDS,
     DEFAULT_AGENT_KEY_MIN_TTL_SECONDS,
     PROVIDER_REGISTRY,
@@ -44,7 +44,7 @@ logger = logging.getLogger(__name__)
 def _load_config_safe() -> Optional[dict]:
     """Load config.yaml, returning None on any error."""
     try:
-        from hermes_cli.config import load_config
+        from forge_cli.config import load_config
 
         return load_config()
     except Exception:
@@ -313,7 +313,7 @@ def _iter_custom_providers(config: Optional[dict] = None):
     if not isinstance(custom_providers, list):
         # Fall back to the v12+ providers dict via the compatibility layer
         try:
-            from hermes_cli.config import get_compatible_custom_providers
+            from forge_cli.config import get_compatible_custom_providers
 
             custom_providers = get_compatible_custom_providers(config)
         except Exception:
@@ -1510,7 +1510,7 @@ def _seed_from_singletons(provider: str, entries: List[PooledCredential]) -> Tup
     # Shared suppression gate — used at every upsert site so
     # `hermes auth remove <provider> <N>` is stable across all source types.
     try:
-        from hermes_cli.auth import is_source_suppressed as _is_suppressed
+        from forge_cli.auth import is_source_suppressed as _is_suppressed
     except ImportError:
         def _is_suppressed(_p, _s):  # type: ignore[misc]
             return False
@@ -1521,7 +1521,7 @@ def _seed_from_singletons(provider: str, entries: List[PooledCredential]) -> Tup
         # Without this gate, auxiliary client fallback chains silently read
         # ~/.claude/.credentials.json without user consent.  See PR #4210.
         try:
-            from hermes_cli.auth import is_provider_explicitly_configured
+            from forge_cli.auth import is_provider_explicitly_configured
             if not is_provider_explicitly_configured("anthropic"):
                 return changed, active_sources
         except ImportError:
@@ -1659,7 +1659,7 @@ def _seed_from_singletons(provider: str, entries: List[PooledCredential]) -> Tup
         # env vars (COPILOT_GITHUB_TOKEN / GH_TOKEN).  They don't live in
         # the auth store or credential pool, so we resolve them here.
         try:
-            from hermes_cli.copilot_auth import resolve_copilot_token, get_copilot_api_token
+            from forge_cli.copilot_auth import resolve_copilot_token, get_copilot_api_token
             token, source = resolve_copilot_token()
             if token:
                 api_token = get_copilot_api_token(token)
@@ -1689,7 +1689,7 @@ def _seed_from_singletons(provider: str, entries: List[PooledCredential]) -> Tup
         # Use refresh_if_expiring=False to avoid network calls during
         # pool loading / provider discovery.
         try:
-            from hermes_cli.auth import resolve_qwen_runtime_credentials
+            from forge_cli.auth import resolve_qwen_runtime_credentials
             creds = resolve_qwen_runtime_credentials(refresh_if_expiring=False)
             token = creds.get("api_key", "")
             if token:
@@ -1720,7 +1720,7 @@ def _seed_from_singletons(provider: str, entries: List[PooledCredential]) -> Tup
         # always refreshes on expiry, so instead read raw state here to avoid
         # surprise network calls during provider discovery.
         try:
-            from hermes_cli.auth import get_provider_auth_state
+            from forge_cli.auth import get_provider_auth_state
             state = get_provider_auth_state("minimax-oauth")
             if state and state.get("access_token"):
                 source_name = "oauth"
@@ -1800,7 +1800,7 @@ def _seed_from_singletons(provider: str, entries: List[PooledCredential]) -> Tup
         tokens = state.get("tokens") if isinstance(state, dict) else None
         if isinstance(tokens, dict) and tokens.get("access_token"):
             active_sources.add("loopback_pkce")
-            from hermes_cli.auth import DEFAULT_XAI_OAUTH_BASE_URL
+            from forge_cli.auth import DEFAULT_XAI_OAUTH_BASE_URL
 
             base_url = DEFAULT_XAI_OAUTH_BASE_URL
             changed |= _upsert_entry(
@@ -1840,14 +1840,14 @@ def _seed_from_env(provider: str, entries: List[PooledCredential]) -> Tuple[bool
     # Without this gate the removal is silently undone on the next
     # load_pool() call whenever the var is still exported by the shell.
     try:
-        from hermes_cli.auth import is_source_suppressed as _is_source_suppressed
+        from forge_cli.auth import is_source_suppressed as _is_source_suppressed
     except ImportError:
         def _is_source_suppressed(_p, _s):  # type: ignore[misc]
             return False
 
     def _secret_source_for_env(env_var: str) -> Optional[str]:
         try:
-            from hermes_cli.env_loader import get_secret_source
+            from forge_cli.env_loader import get_secret_source
             source_label = get_secret_source(env_var)
         except Exception:
             source_label = None
@@ -1967,7 +1967,7 @@ def _seed_custom_pool(pool_key: str, entries: List[PooledCredential]) -> Tuple[b
 
     # Shared suppression gate — same pattern as _seed_from_env/_seed_from_singletons.
     try:
-        from hermes_cli.auth import is_source_suppressed as _is_suppressed
+        from forge_cli.auth import is_source_suppressed as _is_suppressed
     except ImportError:
         def _is_suppressed(_p, _s):  # type: ignore[misc]
             return False

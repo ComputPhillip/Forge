@@ -18,7 +18,7 @@ import pytest
 
 
 # Path to the source files under test
-_SRC_ROOT = Path(__file__).parent.parent.parent / "hermes_cli"
+_SRC_ROOT = Path(__file__).parent.parent.parent / "forge_cli"
 
 
 class TestInitPairClampingBehavior:

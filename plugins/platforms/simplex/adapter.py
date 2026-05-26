@@ -664,7 +664,7 @@ def interactive_setup() -> None:
     """Minimal stdin wizard for ``hermes setup gateway`` → SimpleX.
 
     Prompts for the WebSocket URL and the optional allowlist / home channel.
-    Writes to ``~/.hermes/.env`` via ``hermes_cli.config``.
+    Writes to ``~/.hermes/.env`` via ``forge_cli.config``.
     """
     print()
     print("SimpleX Chat setup")
@@ -675,9 +675,9 @@ def interactive_setup() -> None:
     print()
 
     try:
-        from hermes_cli.config import get_env_value, save_env_value
+        from forge_cli.config import get_env_value, save_env_value
     except ImportError:
-        print("hermes_cli.config not available; set SIMPLEX_* vars manually in ~/.hermes/.env")
+        print("forge_cli.config not available; set SIMPLEX_* vars manually in ~/.hermes/.env")
         return
 
     def _prompt(var: str, prompt: str, *, secret: bool = False) -> None:
@@ -685,7 +685,7 @@ def interactive_setup() -> None:
         suffix = " [keep current]" if existing else ""
         try:
             if secret:
-                from hermes_cli.secret_prompt import masked_secret_prompt
+                from forge_cli.secret_prompt import masked_secret_prompt
                 value = masked_secret_prompt(f"{prompt}{suffix}: ")
             else:
                 value = input(f"{prompt}{suffix}: ").strip()

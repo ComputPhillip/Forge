@@ -187,7 +187,7 @@ _MODELS_DEV_TO_PROVIDER: Optional[Dict[str, str]] = None
 
 def _get_cache_path() -> Path:
     """Return path to disk cache file."""
-    from hermes_constants import get_hermes_home
+    from forge_constants import get_hermes_home
     return get_hermes_home() / "models_dev_cache.json"
 
 
@@ -514,7 +514,7 @@ def list_provider_models(provider: str) -> List[str]:
 
     Returns an empty list if the provider is unknown or has no data.
     """
-    from hermes_cli.models import normalize_provider
+    from forge_cli.models import normalize_provider
     provider = normalize_provider(provider) or provider
     
     models = _get_provider_models(provider)

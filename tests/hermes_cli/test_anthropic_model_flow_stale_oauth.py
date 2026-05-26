@@ -10,7 +10,7 @@ import json
 import pytest
 from unittest.mock import patch, MagicMock
 
-from hermes_cli.config import load_env, save_env_value
+from forge_cli.config import load_env, save_env_value
 
 
 class TestStaleOAuthTokenDetection:
@@ -54,9 +54,9 @@ class TestStaleOAuthTokenDetection:
 
         # Simulate user types "3" (Cancel) when prompted for re-auth
         monkeypatch.setattr("builtins.input", lambda _: "3")
-        monkeypatch.setattr("hermes_cli.secret_prompt.masked_secret_prompt", lambda _: "")
+        monkeypatch.setattr("forge_cli.secret_prompt.masked_secret_prompt", lambda _: "")
 
-        from hermes_cli.main import _model_flow_anthropic
+        from forge_cli.main import _model_flow_anthropic
         cfg = {}
 
         _model_flow_anthropic(cfg)
@@ -95,7 +95,7 @@ class TestStaleOAuthTokenDetection:
         # Simulate user picks "1" (use existing)
         monkeypatch.setattr("builtins.input", lambda _: "1")
 
-        from hermes_cli.main import _model_flow_anthropic
+        from forge_cli.main import _model_flow_anthropic
         cfg = {}
 
         _model_flow_anthropic(cfg)
@@ -139,7 +139,7 @@ class TestStaleOAuthTokenDetection:
         # Simulate user picks "1" (use existing)
         monkeypatch.setattr("builtins.input", lambda _: "1")
 
-        from hermes_cli.main import _model_flow_anthropic
+        from forge_cli.main import _model_flow_anthropic
         cfg = {}
 
         _model_flow_anthropic(cfg)
