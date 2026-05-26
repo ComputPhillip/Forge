@@ -1,0 +1,36 @@
+Forge
+=====
+
+Forge is a community fork of hermes-agent by Nous Research.
+
+Upstream project:
+    Name:        hermes-agent
+    Author:      Nous Research
+    Repository:  https://github.com/NousResearch/hermes-agent
+    License:     MIT (see LICENSE)
+
+Fork point:
+    Commit SHA:  e3236e99a40b84709d8bdd255136c1af8fb91aee
+    Date:        2026-05-25
+    Branch:      feature/seeded-codex-harness
+
+The original MIT license and copyright notice from Nous Research are
+preserved in the LICENSE file unchanged, as required by the MIT license.
+Forge is also distributed under the MIT license.
+
+Modifications made in Forge over the upstream are tracked in the Forge
+git history starting from the fork point. Substantial behavioral changes
+will be documented in CHANGELOG.md.
+
+Acknowledgements
+----------------
+
+Nous Research built and maintains hermes-agent. Forge would not exist
+without their work. Issues with upstream behavior should be reported to
+both the Forge repository and (if reproducible against upstream) the
+hermes-agent repository.
+
+If you are using Forge in production, consider whether the upstream
+hermes-agent meets your needs — it has a larger community, more
+contributors, and faster security response times. Forge's value is in
+divergent design choices, not bug fixes that should land upstream.
