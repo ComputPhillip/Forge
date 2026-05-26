@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 200" width="1200" height="200" role="img" aria-label="Forge — a community fork of hermes-agent">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0d1117"/>
+      <stop offset="100%" stop-color="#161b22"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFD700"/>
+      <stop offset="50%" stop-color="#FFBF00"/>
+      <stop offset="100%" stop-color="#CD7F32"/>
+    </linearGradient>
+    <linearGradient id="anvil" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFBF00"/>
+      <stop offset="100%" stop-color="#B8860B"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="2.5" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="200" fill="url(#bg)"/>
+
+  <!-- Subtle hex/grid pattern hint, low opacity -->
+  <g stroke="#FFD700" stroke-opacity="0.04" stroke-width="1">
+    <line x1="0" y1="50"  x2="1200" y2="50"/>
+    <line x1="0" y1="100" x2="1200" y2="100"/>
+    <line x1="0" y1="150" x2="1200" y2="150"/>
+  </g>
+
+  <!-- Anvil icon, left-aligned -->
+  <g transform="translate(70, 100)" fill="url(#anvil)" filter="url(#glow)">
+    <!-- anvil silhouette -->
+    <path d="M -38,-6 L 38,-6 L 30,8 L 22,12 L -22,12 L -30,8 Z"/>
+    <rect x="-12" y="12" width="24" height="14"/>
+    <rect x="-22" y="26" width="44" height="6"/>
+    <!-- horn -->
+    <path d="M 38,-6 L 56,-2 L 50,4 L 38,4 Z"/>
+  </g>
+
+  <!-- FORGE wordmark -->
+  <text x="170" y="118"
+        font-family="'Segoe UI', 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif"
+        font-size="92"
+        font-weight="800"
+        letter-spacing="14"
+        fill="url(#gold)"
+        filter="url(#glow)">FORGE</text>
+
+  <!-- Decorative separator -->
+  <line x1="170" y1="138" x2="600" y2="138" stroke="#FFBF00" stroke-opacity="0.5" stroke-width="1"/>
+
+  <!-- Tagline -->
+  <text x="170" y="166"
+        font-family="'Segoe UI', 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif"
+        font-size="18"
+        font-weight="400"
+        letter-spacing="2"
+        fill="#9aa7bd">A community fork of hermes-agent · MIT-licensed · Early</text>
+
+  <!-- Right-side status block -->
+  <g transform="translate(1130, 100)" text-anchor="end"
+     font-family="'JetBrains Mono', 'Fira Code', 'Consolas', monospace"
+     fill="#CD7F32">
+    <text font-size="14" font-weight="600" y="-14">v0.1.0</text>
+    <text font-size="11" font-weight="400" y="6" fill="#9aa7bd">engine: hermes-agent</text>
+    <text font-size="11" font-weight="400" y="22" fill="#6b7280">© 2025 Nous Research</text>
+  </g>
+</svg>
